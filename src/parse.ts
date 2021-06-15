@@ -351,6 +351,18 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
     return parsedSchema as TypeContentWithName;
   });
 
+  if (details?.patterns?.length === 1) {
+    // TODO check if pattern is of type Joi.string() otherwise ignore
+    const parsedPatternSchema = parseSchema(details?.patterns[0].rule, settings);
+    const recordProperty: TypeContentWithName = {
+      joinOperation: 'object',
+      name: '[x: string]',
+      required: true,
+      children: [parsedPatternSchema]
+    } as TypeContentWithName;
+    children.push(recordProperty);
+  }
+
   if (details?.flags?.unknown === true) {
     const unknownProperty = {
       content: 'any',
