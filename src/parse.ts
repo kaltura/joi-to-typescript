@@ -1,5 +1,5 @@
 import { filterMap, toStringLiteral } from './utils';
-import { TypeContent, makeTypeContentRoot, makeTypeContentChild, Settings, JsDoc } from './types';
+import { TypeContent, makeTypeContentRoot, makeTypeContentChild, Settings, JsDoc, TypeContentRoot } from './types';
 import {
   AlternativesDescribe,
   ArrayDescribe,
@@ -352,9 +352,14 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
   });
 
   if (details?.patterns?.length === 1) {
-    // TODO check if pattern is of type Joi.string() otherwise ignore
-    const parsedPatternSchema = parseSchema(details?.patterns[0].rule, settings);
+    const isRecord = (parsedSchema: any): parsedSchema is TypeContentRoot =>
+      parsedSchema?.name === undefined && Array.isArray(parsedSchema.children);
+    let parsedPatternSchema = parseSchema(details?.patterns[0].rule, settings);
+    if (isRecord(parsedPatternSchema)) {
+      parsedPatternSchema = parsedPatternSchema?.children[0];
+    }
     const recordProperty: TypeContentWithName = {
+      __isRoot: true,
       joinOperation: 'object',
       name: '[x: string]',
       required: true,
