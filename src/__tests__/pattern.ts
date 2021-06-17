@@ -14,13 +14,15 @@ describe('test `Joi.object().pattern()`', () => {
         nestedName: Joi.string()
       }),
       nestedPattern: Joi.object().pattern(Joi.string(), itemSchema),
-      nestedPattern2: Joi.object().pattern(
-        Joi.string(),
-        Joi.object({
-          test: Joi.number(),
-          test1: Joi.string()
-        })
-      )
+      nestedPattern2: Joi.object()
+        .pattern(
+          Joi.string(),
+          Joi.object({
+            test: Joi.number(),
+            test1: Joi.string()
+          }).required()
+        )
+        .required()
     })
       .label('TestSchema')
       .description('a test schema definition');
@@ -39,8 +41,8 @@ export interface TestSchema {
   nestedPattern?: {
     [x: string]?: Item;
   };
-  nestedPattern2?: {
-    [x: string]?: {
+  nestedPattern2: {
+    [x: string]: {
       test?: number;
       test1?: string;
     };
