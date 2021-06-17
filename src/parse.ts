@@ -1,5 +1,13 @@
 import { filterMap, toStringLiteral } from './utils';
-import { TypeContent, makeTypeContentRoot, makeTypeContentChild, Settings, JsDoc, TypeContentRoot } from './types';
+import {
+  TypeContent,
+  makeTypeContentRoot,
+  makeTypeContentChild,
+  Settings,
+  JsDoc,
+  TypeContentRoot,
+  TypeContentChild
+} from './types';
 import {
   AlternativesDescribe,
   ArrayDescribe,
@@ -354,17 +362,35 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
   if (details?.patterns?.length === 1) {
     const isRecord = (parsedSchema: any): parsedSchema is TypeContentRoot =>
       parsedSchema?.name === undefined && Array.isArray(parsedSchema.children);
-    let parsedPatternSchema = parseSchema(details?.patterns[0].rule, settings);
+    const isCustomType = (parsedSchema: any): parsedSchema is TypeContentChild =>
+      parsedSchema?.name === undefined && Array.isArray(parsedSchema.customTypes);
+
+    const parsedPatternSchema = parseSchema(details?.patterns[0].rule, settings);
+
+    let propertyChildren = [parsedPatternSchema];
+
     if (isRecord(parsedPatternSchema)) {
-      parsedPatternSchema = parsedPatternSchema?.children[0];
+      propertyChildren = [...parsedPatternSchema?.children];
     }
-    const recordProperty: TypeContentWithName = {
-      __isRoot: true,
-      joinOperation: 'object',
-      name: '[x: string]',
-      required: true,
-      children: [parsedPatternSchema]
-    } as TypeContentWithName;
+
+    let recordProperty: TypeContentWithName;
+
+    if (isCustomType(parsedPatternSchema)) {
+      recordProperty = {
+        content: parsedPatternSchema.content,
+        name: '[x: string]',
+        required: parsedPatternSchema.required
+      } as TypeContentWithName;
+    } else {
+      recordProperty = {
+        __isRoot: true,
+        joinOperation: 'object',
+        name: '[x: string]',
+        required: parsedPatternSchema?.required,
+        children: [...propertyChildren]
+      } as TypeContentWithName;
+    }
+
     children.push(recordProperty);
   }
 
