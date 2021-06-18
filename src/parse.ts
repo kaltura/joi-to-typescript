@@ -378,15 +378,16 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
     if (isCustomType(parsedPatternSchema)) {
       recordProperty = {
         content: parsedPatternSchema.content,
+        customTypes: [parsedPatternSchema.content],
         name: '[x: string]',
-        required: parsedPatternSchema.required
+        required: true
       } as TypeContentWithName;
     } else {
       recordProperty = {
         __isRoot: true,
         joinOperation: 'object',
         name: '[x: string]',
-        required: parsedPatternSchema?.required,
+        required: true,
         children: [...propertyChildren]
       } as TypeContentWithName;
     }
