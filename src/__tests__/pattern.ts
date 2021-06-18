@@ -50,7 +50,36 @@ export interface TestSchema {
 }`);
   });
 
-  test('`with alternatives`', () => {
+  test('number index signature', () => {
+    const schema = Joi.object({
+      test: Joi.object()
+        .pattern(
+          Joi.number(),
+          Joi.object({
+            foo: Joi.string()
+          })
+        )
+        .required()
+    })
+      .label('TestSchema')
+      .description('a test schema definition');
+
+    const result = convertSchema({ sortPropertiesByName: false }, schema);
+    expect(result).not.toBeUndefined;
+
+    expect(result?.content).toBe(`/**
+ * a test schema definition
+ */
+export interface TestSchema {
+  test: {
+    [key: number]: {
+      foo?: string;
+    };
+  };
+}`);
+  });
+
+  test('with alternatives', () => {
     const fooSchema = Joi.object({
       foo: Joi.string()
     }).label('Foo');
