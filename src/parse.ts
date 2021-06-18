@@ -380,14 +380,14 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
       recordProperty = {
         content: parsedPatternSchema.content,
         customTypes: [parsedPatternSchema.content],
-        name: '[x: string]',
+        name: '[key: string]',
         required: true
       } as TypeContentWithName;
     } else {
       recordProperty = {
         __isRoot: true,
         joinOperation: parsedPatternSchema?.joinOperation,
-        name: '[x: string]',
+        name: '[key: string]',
         required: true,
         children: [...propertyChildren]
       } as TypeContentWithName;
@@ -399,7 +399,7 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
   if (details?.flags?.unknown === true) {
     const unknownProperty = {
       content: 'any',
-      name: '[x: string]',
+      name: '[key: string]',
       required: true,
       jsDoc: { description: 'Unknown Property' }
     } as TypeContentWithName;

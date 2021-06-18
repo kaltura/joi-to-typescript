@@ -39,10 +39,10 @@ export interface TestSchema {
     nestedName?: string;
   };
   nestedPattern?: {
-    [x: string]: Item;
+    [key: string]: Item;
   };
   nestedPattern2: {
-    [x: string]: {
+    [key: string]: {
       test?: number;
       test1?: string;
     };
@@ -85,7 +85,7 @@ export interface TestSchema {
  */
 export interface TestSchema {
   test: {
-    [x: string]: Foo | Baz | string | {
+    [key: string]: Foo | Baz | string | {
       bar: number;
     };
   };
