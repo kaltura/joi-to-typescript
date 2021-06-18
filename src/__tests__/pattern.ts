@@ -20,7 +20,7 @@ describe('test `Joi.object().pattern()`', () => {
           Joi.object({
             test: Joi.number(),
             test1: Joi.string()
-          }).required()
+          })
         )
         .required()
     })
@@ -39,7 +39,7 @@ export interface TestSchema {
     nestedName?: string;
   };
   nestedPattern?: {
-    [x: string]?: Item;
+    [x: string]: Item;
   };
   nestedPattern2: {
     [x: string]: {

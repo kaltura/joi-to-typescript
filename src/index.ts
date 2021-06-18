@@ -51,6 +51,16 @@ export function getTypeFileNameFromSchema(schemaFileName: string, settings: Sett
     : schemaFileName.replace('.ts', '');
 }
 
+export function capitalizeFirstLetter(string: string): string {
+  return string[0].toUpperCase() + string.slice(1);
+}
+
+export function getTypeNameFromSchemaName(schemaName: string, settings: Settings): string {
+  return settings.typeNameSuffix && schemaName.endsWith(settings.typeNameSuffix)
+    ? capitalizeFirstLetter(schemaName.substring(0, schemaName.length - settings.typeNameSuffix.length))
+    : schemaName;
+}
+
 /**
  * Write index.ts file
  *
