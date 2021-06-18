@@ -17,6 +17,7 @@ import {
   ObjectDescribe,
   StringDescribe
 } from 'joiDescribeTypes';
+import { capitalizeFirstLetter } from './index';
 
 // see __tests__/joiTypes.ts for more information
 export const supportedJoiTypes = ['array', 'object', 'alternatives', 'any', 'boolean', 'date', 'number', 'string'];
@@ -125,6 +126,23 @@ function typeContentToTsHelper(
       }
       return { tsContent: unionStr, jsDoc: parsedSchema.jsDoc };
     }
+    case 'enum': {
+      const childrenContent = children.map(child => typeContentToTsHelper(settings, child, indentLevel).tsContent);
+      const indentString = getIndentStr(settings, 1);
+      const enumStr = childrenContent
+        .map(childContent => {
+          const value = childContent
+            .split(/[\s-]+/g)
+            .map(chunk => (chunk ? capitalizeFirstLetter(chunk.trim().replace(/'/g, '')) : ''))
+            .join('');
+          return `${indentString}${value} = ${childContent},`;
+        })
+        .join('\n');
+      if (doExport) {
+        return { tsContent: `export enum ${parsedSchema.name} {\n${enumStr}\n}`, jsDoc: parsedSchema.jsDoc };
+      }
+      return { tsContent: enumStr, jsDoc: parsedSchema.jsDoc };
+    }
     case 'object': {
       if (!children.length && !doExport) {
         return { tsContent: 'object', jsDoc: parsedSchema.jsDoc };
@@ -204,7 +222,10 @@ export function parseSchema(
 
     const child = makeTypeContentChild({ content: label, customTypes: [label], jsDoc, required });
 
-    const allowedValues = createAllowTypes(details);
+    const isTypeContentChild = (testValue: any): testValue is TypeContentChild => testValue?.__isRoot === false;
+    const allowedValues = createAllowTypes(details).filter(
+      allowedValue => isTypeContentChild(allowedValue) && allowedValue?.content === 'null'
+    );
     if (allowedValues.length !== 0) {
       allowedValues.unshift(child);
 
@@ -295,7 +316,8 @@ function parseStringSchema(details: StringDescribe, settings: Settings, rootSche
       if (values.filter(value => stringAllowValues.includes(value)).length == values.length) {
         allowedValues.unshift(makeTypeContentChild({ content: 'string' }));
       }
-      return makeTypeContentRoot({ joinOperation: 'union', children: allowedValues, name, jsDoc });
+      const joinOperation = details?.flags?.label ? 'enum' : 'union';
+      return makeTypeContentRoot({ joinOperation, children: allowedValues, name, jsDoc });
     }
   }
 

@@ -52,7 +52,7 @@ export function getTypeFileNameFromSchema(schemaFileName: string, settings: Sett
 }
 
 export function capitalizeFirstLetter(string: string): string {
-  return string[0].toUpperCase() + string.slice(1);
+  return string ? string[0].toUpperCase() + string.slice(1) : string;
 }
 
 export function getTypeNameFromSchemaName(schemaName: string, settings: Settings): string {

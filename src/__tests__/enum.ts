@@ -40,4 +40,43 @@ export interface TestSchema {
   bit: 0 | 1 | '0' | '1' | null;
 }`);
   });
+
+  test('enum', () => {
+    const fooSchema = Joi.string()
+      .valid('test1', 'test 2', 'test-3')
+      .label('Foo')
+      .description('a test schema definition');
+
+    const result = convertSchema({ sortPropertiesByName: false }, fooSchema);
+    expect(result).not.toBeUndefined;
+
+    expect(result?.content).toBe(`/**
+ * a test schema definition
+ */
+export enum Foo {
+  Test1 = 'test1',
+  Test2 = 'test 2',
+  Test3 = 'test-3',
+}`);
+  });
+
+  test('enum in object', () => {
+    const fooSchema = Joi.string().valid('test1', 'test 2', 'test-3').label('Foo');
+
+    const schema = Joi.object({
+      bit: fooSchema.required()
+    })
+      .label('TestSchema')
+      .description('a test schema definition');
+
+    const result = convertSchema({ sortPropertiesByName: false }, schema);
+    expect(result).not.toBeUndefined;
+
+    expect(result?.content).toBe(`/**
+ * a test schema definition
+ */
+export interface TestSchema {
+  bit: Foo;
+}`);
+  });
 });
