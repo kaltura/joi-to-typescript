@@ -359,7 +359,8 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
     return parsedSchema as TypeContentWithName;
   });
 
-  if (details?.patterns?.length === 1) {
+  // parse records (`{ [key: string]: unknown }`)
+  if (details?.patterns?.length === 1 && details.patterns[0]?.schema?.type === 'string') {
     const isRecord = (parsedSchema: any): parsedSchema is TypeContentRoot =>
       parsedSchema?.name === undefined && Array.isArray(parsedSchema.children);
     const isCustomType = (parsedSchema: any): parsedSchema is TypeContentChild =>
