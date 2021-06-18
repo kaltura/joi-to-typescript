@@ -49,4 +49,46 @@ export interface TestSchema {
   };
 }`);
   });
+
+  test('`with alternatives`', () => {
+    const fooSchema = Joi.object({
+      foo: Joi.string()
+    }).label('Foo');
+
+    const bazSchema = Joi.string().label('Baz');
+
+    const stringSchema = Joi.string();
+
+    const schema = Joi.object({
+      test: Joi.object()
+        .pattern(
+          Joi.string(),
+          Joi.alternatives().try(
+            fooSchema,
+            bazSchema,
+            stringSchema,
+            Joi.object({
+              bar: Joi.number().required()
+            })
+          )
+        )
+        .required()
+    })
+      .label('TestSchema')
+      .description('a test schema definition');
+
+    const result = convertSchema({ sortPropertiesByName: false }, schema);
+    expect(result).not.toBeUndefined;
+
+    expect(result?.content).toBe(`/**
+ * a test schema definition
+ */
+export interface TestSchema {
+  test: {
+    [x: string]: Foo | Baz | string | {
+      bar: number;
+    };
+  };
+}`);
+  });
 });

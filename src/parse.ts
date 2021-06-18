@@ -385,7 +385,7 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
     } else {
       recordProperty = {
         __isRoot: true,
-        joinOperation: 'object',
+        joinOperation: parsedPatternSchema?.joinOperation,
         name: '[x: string]',
         required: true,
         children: [...propertyChildren]
