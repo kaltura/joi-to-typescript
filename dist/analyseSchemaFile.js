@@ -15,7 +15,7 @@ function convertSchemaInternal(settings, joi, exportedName, rootSchema) {
     if (!name) {
         throw new Error(`At least one "object" does not have a .label(). Details: ${JSON.stringify(details)}`);
     }
-    if (settings.debug && name.toLowerCase().endsWith('schema')) {
+    if (settings.debug && name.toLowerCase().endsWith('schema') && !settings.typeNameSuffix) {
         console.debug(`It is recommended you update the Joi Schema '${name}' similar to: ${name} = Joi.object().label('${name.replace('Schema', '')}')`);
     }
     // Set the label from the exportedName if missing
@@ -62,7 +62,7 @@ async function analyseSchemaFile(settings, schemaFileName) {
         if (!joi_1.default.isSchema(joiSchema)) {
             continue;
         }
-        const convertedType = convertSchemaInternal(settings, joiSchema, exportedName, true);
+        const convertedType = convertSchemaInternal(settings, joiSchema, index_1.getTypeNameFromSchemaName(exportedName, settings), true);
         if (convertedType) {
             allConvertedTypes.push({ ...convertedType, location: fullOutputFilePath });
         }

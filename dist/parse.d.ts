@@ -1,4 +1,4 @@
-import { TypeContent, Settings } from './types';
+import { Settings, TypeContent } from './types';
 import { Describe } from 'joiDescribeTypes';
 export declare const supportedJoiTypes: string[];
 export declare function getAllCustomTypes(parsedSchema: TypeContent): string[];

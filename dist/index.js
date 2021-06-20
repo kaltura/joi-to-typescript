@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.convertFromDirectory = exports.writeIndexFile = exports.getTypeFileNameFromSchema = exports.convertSchema = void 0;
+exports.convertFromDirectory = exports.writeIndexFile = exports.getTypeNameFromSchemaName = exports.capitalizeFirstLetter = exports.getTypeFileNameFromSchema = exports.convertSchema = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = require("fs");
 const convertFilesInDirectory_1 = require("./convertFilesInDirectory");
@@ -42,6 +42,16 @@ function getTypeFileNameFromSchema(schemaFileName, settings) {
         : schemaFileName.replace('.ts', '');
 }
 exports.getTypeFileNameFromSchema = getTypeFileNameFromSchema;
+function capitalizeFirstLetter(string) {
+    return string[0].toUpperCase() + string.slice(1);
+}
+exports.capitalizeFirstLetter = capitalizeFirstLetter;
+function getTypeNameFromSchemaName(schemaName, settings) {
+    return settings.typeNameSuffix && schemaName.endsWith(settings.typeNameSuffix)
+        ? capitalizeFirstLetter(schemaName.substring(0, schemaName.length - settings.typeNameSuffix.length))
+        : schemaName;
+}
+exports.getTypeNameFromSchemaName = getTypeNameFromSchemaName;
 /**
  * Write index.ts file
  *

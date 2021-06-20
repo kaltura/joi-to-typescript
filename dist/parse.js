@@ -285,7 +285,7 @@ function parseAlternatives(details, settings) {
     return types_1.makeTypeContentRoot({ joinOperation: 'union', children, name: label, jsDoc });
 }
 function parseObjects(details, settings) {
-    var _a;
+    var _a, _b, _c, _d;
     let children = utils_1.filterMap(Object.entries(details.keys || {}), ([key, value]) => {
         const parsedSchema = parseSchema(value, settings);
         // The only type that could return this is alternatives
@@ -296,7 +296,39 @@ function parseObjects(details, settings) {
         parsedSchema.name = /^[$A-Z_][0-9A-Z_$]*$/i.test(key || '') ? key : `'${key}'`;
         return parsedSchema;
     });
-    if (((_a = details === null || details === void 0 ? void 0 : details.flags) === null || _a === void 0 ? void 0 : _a.unknown) === true) {
+    if (((_a = details === null || details === void 0 ? void 0 : details.patterns) === null || _a === void 0 ? void 0 : _a.length) === 1) {
+        const type = (_c = (_b = details.patterns[0]) === null || _b === void 0 ? void 0 : _b.schema) === null || _c === void 0 ? void 0 : _c.type;
+        // TypeScript index signatures must be either `string` or `number`
+        if (['string', 'number'].includes(type)) {
+            const isRecord = (parsedSchema) => (parsedSchema === null || parsedSchema === void 0 ? void 0 : parsedSchema.name) === undefined && Array.isArray(parsedSchema.children);
+            const isCustomType = (parsedSchema) => (parsedSchema === null || parsedSchema === void 0 ? void 0 : parsedSchema.name) === undefined && Array.isArray(parsedSchema.customTypes);
+            const parsedPatternSchema = parseSchema(details === null || details === void 0 ? void 0 : details.patterns[0].rule, settings);
+            let propertyChildren = [parsedPatternSchema];
+            if (isRecord(parsedPatternSchema)) {
+                propertyChildren = [...parsedPatternSchema === null || parsedPatternSchema === void 0 ? void 0 : parsedPatternSchema.children];
+            }
+            let recordProperty;
+            if (isCustomType(parsedPatternSchema)) {
+                recordProperty = {
+                    content: parsedPatternSchema.content,
+                    customTypes: [parsedPatternSchema.content],
+                    name: `[x: ${type}]`,
+                    required: true
+                };
+            }
+            else {
+                recordProperty = {
+                    __isRoot: true,
+                    joinOperation: parsedPatternSchema === null || parsedPatternSchema === void 0 ? void 0 : parsedPatternSchema.joinOperation,
+                    name: `[x: ${type}]`,
+                    required: true,
+                    children: [...propertyChildren]
+                };
+            }
+            children.push(recordProperty);
+        }
+    }
+    if (((_d = details === null || details === void 0 ? void 0 : details.flags) === null || _d === void 0 ? void 0 : _d.unknown) === true) {
         const unknownProperty = {
             content: 'any',
             name: '[x: string]',

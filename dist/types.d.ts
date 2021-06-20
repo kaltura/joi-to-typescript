@@ -65,6 +65,10 @@ export interface Settings {
      * @default '  ' (two spaces)
      */
     readonly indentationChacters: string;
+    /**
+     * When provided inheriting a name from schema name and removing suffix from the name
+     */
+    readonly typeNameSuffix: string;
 }
 export interface ConvertedType {
     name: string;

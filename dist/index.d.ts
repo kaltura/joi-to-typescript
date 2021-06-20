@@ -3,6 +3,8 @@ import { Settings, ConvertedType } from './types';
 export { Settings };
 export declare function convertSchema(settings: Partial<Settings>, joi: AnySchema, exportedName?: string): ConvertedType | undefined;
 export declare function getTypeFileNameFromSchema(schemaFileName: string, settings: Settings): string;
+export declare function capitalizeFirstLetter(string: string): string;
+export declare function getTypeNameFromSchemaName(schemaName: string, settings: Settings): string;
 /**
  * Write index.ts file
  *
