@@ -80,7 +80,6 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
-dist
 
 # Gatsby files
 .cache/
@@ -113,3 +112,4 @@ dist
 shell.nix
 
 package-lock.json
+.idea

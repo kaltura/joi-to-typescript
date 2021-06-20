@@ -1,5 +1,13 @@
 import { filterMap, toStringLiteral } from './utils';
-import { TypeContent, makeTypeContentRoot, makeTypeContentChild, Settings, JsDoc } from './types';
+import {
+  JsDoc,
+  makeTypeContentChild,
+  makeTypeContentRoot,
+  Settings,
+  TypeContent,
+  TypeContentChild,
+  TypeContentRoot
+} from './types';
 import {
   AlternativesDescribe,
   ArrayDescribe,
@@ -188,6 +196,7 @@ export function parseSchema(
         return parseBasicSchema(details, settings, rootSchema ?? false);
     }
   }
+
   const { label, jsDoc, required } = getCommonDetails(details, settings);
   if (label && useLabels && !ignoreLabels.includes(label)) {
     // skip parsing and just reference the label since we assumed we parsed the schema that the label references
@@ -350,6 +359,47 @@ function parseObjects(details: ObjectDescribe, settings: Settings): TypeContent 
     parsedSchema.name = /^[$A-Z_][0-9A-Z_$]*$/i.test(key || '') ? key : `'${key}'`;
     return parsedSchema as TypeContentWithName;
   });
+
+  if (details?.patterns?.length === 1) {
+    const type = details.patterns[0]?.schema?.type;
+
+    // TypeScript index signatures must be either `string` or `number`
+    if (['string', 'number'].includes(type)) {
+      const isRecord = (parsedSchema: any): parsedSchema is TypeContentRoot =>
+        parsedSchema?.name === undefined && Array.isArray(parsedSchema.children);
+      const isCustomType = (parsedSchema: any): parsedSchema is TypeContentChild =>
+        parsedSchema?.name === undefined && Array.isArray(parsedSchema.customTypes);
+
+      const parsedPatternSchema = parseSchema(details?.patterns[0].rule, settings);
+
+      let propertyChildren = [parsedPatternSchema];
+
+      if (isRecord(parsedPatternSchema)) {
+        propertyChildren = [...parsedPatternSchema?.children];
+      }
+
+      let recordProperty: TypeContentWithName;
+
+      if (isCustomType(parsedPatternSchema)) {
+        recordProperty = {
+          content: parsedPatternSchema.content,
+          customTypes: [parsedPatternSchema.content],
+          name: `[x: ${type}]`,
+          required: true
+        } as TypeContentWithName;
+      } else {
+        recordProperty = {
+          __isRoot: true,
+          joinOperation: parsedPatternSchema?.joinOperation,
+          name: `[x: ${type}]`,
+          required: true,
+          children: [...propertyChildren]
+        } as TypeContentWithName;
+      }
+
+      children.push(recordProperty);
+    }
+  }
 
   if (details?.flags?.unknown === true) {
     const unknownProperty = {

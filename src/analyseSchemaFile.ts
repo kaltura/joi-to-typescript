@@ -2,7 +2,7 @@ import Joi, { AnySchema } from 'joi';
 import Path from 'path';
 
 import { Settings, ConvertedType, GenerateTypeFile } from './types';
-import { getTypeFileNameFromSchema } from './index';
+import { getTypeFileNameFromSchema, getTypeNameFromSchemaName } from './index';
 import { getAllCustomTypes, parseSchema, typeContentToTs } from './parse';
 import { Describe } from 'joiDescribeTypes';
 
@@ -19,7 +19,7 @@ export function convertSchemaInternal(
     throw new Error(`At least one "object" does not have a .label(). Details: ${JSON.stringify(details)}`);
   }
 
-  if (settings.debug && name.toLowerCase().endsWith('schema')) {
+  if (settings.debug && name.toLowerCase().endsWith('schema') && !settings.typeNameSuffix) {
     console.debug(
       `It is recommended you update the Joi Schema '${name}' similar to: ${name} = Joi.object().label('${name.replace(
         'Schema',
@@ -79,7 +79,13 @@ export async function analyseSchemaFile(
     if (!Joi.isSchema(joiSchema)) {
       continue;
     }
-    const convertedType = convertSchemaInternal(settings, joiSchema, exportedName, true);
+
+    const convertedType = convertSchemaInternal(
+      settings,
+      joiSchema,
+      getTypeNameFromSchemaName(exportedName, settings),
+      true
+    );
     if (convertedType) {
       allConvertedTypes.push({ ...convertedType, location: fullOutputFilePath });
     }
