@@ -6,7 +6,7 @@
   },
   "dependencies": {
     "@types/node": "^14.14.14",
-    "joi": "^17.3.0"
+    "joi": "^17.5.0"
   },
   "devDependencies": {
     "joi-to-typescript": "^1.12.0",
